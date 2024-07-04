@@ -1,5 +1,4 @@
 
-#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
@@ -13,119 +12,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "city_class.h"
 using namespace std;
 
-//GLOBAL VARIABLES
-const float pi = 3.1415927;
-const float degrees = 180.00;
-const float Earth_r = 3982.00;
-
-//class holding data read in from "city_list.txt"
-class city {
-	public:
-		city() { name = string(); type = string(); zone = 0; pop = 0; lat = 0.000; lon = 0.000; }
-
-		string getName() const { return name; }
-		string getType() const { return type; }
-		int getZone() const { return zone; }
-		int getPop() const { return pop; }
-		float getLat() const { return lat; }
-		float getLon() const { return lon; }
-
-		friend istream& operator>>(istream&, city&);
-		friend ostream& operator<<(ostream&, const city&);
-
-	private:
-		string name, type;
-		int zone, pop;
-		float lat, lon;
-};
-
-istream & operator>>(istream &in, city &c) { 
-	int t1, t6; string t2, t3; float t4, t5;
-
-	in >> t1 >> t2 >> t3 >> t4 >> t5 >> t6;
-
-	//lat and lon are read in as degrees, need to convert to radians
-	c.zone = t1;
-	c.name = t2;
-	c.type = t3;
-	c.lat  = t4*(pi/degrees);
-	c.lon  = t5*(pi/degrees);
-	c.pop  = t6;
-
-	return in;
-}
-
-ostream & operator<<(ostream &out,const city &c) {
-	//lat and lon are stored as radians, need to convert to degrees
-	out << left << setw(18) << c.name
-		<< setw(12) << c.type
-		<< right << setw(10) << c.pop
-		<< setw(2) << c.zone
-		<< setw(8) << fixed << setprecision(2) << c.lat*(degrees/pi)
-		<< setw(8) << c.lon*(degrees/pi);
-
-	return out;
-}
-
-//computes and contains a table of distances between all cities and a table of the time 
-//it takes to get from one city to another
-class costtable{
-	public:
-		costtable(const vector<city>&);
-		float operator()(const bool&, const int&, const int&) const;
-
-	private:
-		vector<float> distance_table;
-		vector<float> time_table;
-};
-
-costtable::costtable(const vector<city> &locations) {
-	int N = (int)locations.size();
-	for(int i=0; i<N; ++i) {
-
-		float la1 = locations[i].getLat();
-		float lo1 = locations[i].getLon();
-		string type1 = locations[i].getType();
-
-		for(int j=0; j<=i; ++j) {
-			
-			float la2 = locations[j].getLat();
-			float lo2 = locations[j].getLon();
-
-			//compute the distance between cities using Great-circle distance
-
-			float central_angle = acos(sin(la1)*sin(la2) + cos(la1)*cos(la2)*cos(fabs(lo1-lo2)));
-			float distance = 10.0*round((central_angle*Earth_r)/10.0);
-			distance_table.push_back(distance);
-
-			//both regional -> ground
-			//regional+gateway -> air
-			//both gateway -> air
-			//ground = 60 mph, air = 570 mph
-
-			string type2 = locations[j].getType();
-
-			if(!type1.compare("REGIONAL") && !type2.compare("REGIONAL")) 
-				time_table.push_back(distance/60.0);
-			else 
-				time_table.push_back(distance/570.0);
-		}
-	}
-}
-
-//overloaded function operator to return the same value for (mode,i,j) and (mode,j,i)
-float costtable::operator()(const bool &mode, const int &i, const int &j) const {
-	if(j<i) {
-		if(mode) return time_table[i*(i+1)/2+j];
-		else return distance_table[i*(i+1)/2+j];
-	}
-	else {
-		if(mode) return time_table[j*(j+1)/2+i];
-		else return distance_table[j*(j+1)/2+i];
-	}
-}
 
 //needs a file to read from and a structure to write to(&)
 void read_cityinfo(vector<city> &locations, map<string,int> &indeces) {
@@ -338,7 +227,7 @@ void write_citygraph(const vector<city> &locations, const costtable &table,
 	fout.close();
 }
 
-//adapted from class handout with output
+
 void dijkstra_route(const vector<city> &locations, const costtable &table,
 		const vector< set<int> > &citygraph, const bool &mode, const int &source, 
 		const int &sink) { 
@@ -450,6 +339,8 @@ int main(int argc, char *argv[])
 
 		return 0;
 	}
+
+	cout << "Usage: [source city] [destination city]\n";
 
 	string from, to;
 	while (cin >> from >> to) {
