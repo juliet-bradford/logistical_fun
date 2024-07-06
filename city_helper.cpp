@@ -1,6 +1,7 @@
-#include "city_class.h"
+#include "city_helper.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
@@ -9,6 +10,14 @@ using std::string;
 using std::vector;
 using std::istream;
 using std::ostream;
+using std::ifstream;
+using std::ofstream;
+using std::setw;
+using std::setprecision;
+using std::setfill;
+using std::right;
+using std::left;
+using std::fixed;
 
 const float pi = 3.1415927;
 const float degrees = 180.00;
@@ -38,12 +47,12 @@ istream & operator>>(istream &in, city &c) {
 ostream & operator<<(ostream &out, const city &c) {
 	
     //lat and lon are stored as radians, need to convert to degrees
-	out << std::left << std::setw(18) << c.name
-		<< std::setw(12) << c.type
-		<< std::right << std::setw(10) << c.pop
-		<< std::setw(2) << c.zone
-		<< std::setw(8) << std::fixed << std::setprecision(2) << c.lat*(degrees/pi)
-		<< std::setw(8) << c.lon*(degrees/pi);
+	out << left << setw(18) << c.name
+		<< setw(12) << c.type
+		<< right << setw(10) << c.pop
+		<< setw(2) << c.zone
+		<< setw(8) << fixed << setprecision(2) << c.lat*(degrees/pi)
+		<< setw(8) << c.lon*(degrees/pi);
 
 	return out;
 }
@@ -91,4 +100,63 @@ float costtable::operator()(const bool &mode, const int &i, const int &j) const 
 		if(mode) return time_table[j*(j+1)/2+i];
 		else return distance_table[j*(j+1)/2+i];
 	}
+}
+
+//three functions outputting costtable data to files, all run with "-graphinfo"
+void write_cityinfo(const vector<city> &locations) { 
+	ofstream fout;
+	fout.open("city_info.txt");
+	
+	fout << "CITY INFO: (N=" << locations.size() << "):\n\n";
+	
+	for(int i=0; i<(int)locations.size(); ++i)
+		fout << setw(3) << i << ' ' << locations[i] << '\n';
+
+	fout.close();
+}
+
+void write_distancetable(const vector<city> &locations, const costtable &table) {
+	ofstream fout;
+	fout.open("city_distancetable.txt");
+
+	fout << "DISTANCE TABLE: \n";
+	
+	for(int i=0; i<(int)locations.size(); ++i) {
+		string name1 = locations[i].getName();
+
+		for(int j=0; j<i; ++j) {
+			string flight = name1 + " to " + locations[j].getName() + ' ';
+
+			fout << setw(3) << i << ' ' << setw(38) << setfill('.') << left << flight << right
+				 << setfill(' ') << setw(7) << setprecision(1) << fixed << table(false, i, j) 
+				 << " miles\n";
+		}
+
+		fout << '\n';
+	}
+
+	fout.close();
+}
+
+void write_timetable(const vector<city> &locations, const costtable &table) {
+	ofstream fout;
+	fout.open("city_timetable.txt");
+
+	fout << "TIME TABLE: \n";
+	
+	for(int i=0; i<(int)locations.size(); ++i) {
+		string name1 = locations[i].getName();
+
+		for(int j=0; j<i; ++j) {
+			string flight = name1 + " to " + locations[j].getName() + ' ';
+
+			fout << setw(3) << i << ' ' << setw(38) << setfill('.') << left << flight << right
+				 << setfill(' ') << setw(5) << setprecision(1) << fixed << table(true, i, j)
+				 << " hours\n";
+		}
+
+		fout << '\n';
+	}
+
+	fout.close();
 }

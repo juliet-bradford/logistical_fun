@@ -1,15 +1,16 @@
 
 CC = g++
 CFLAGS = -g -Wall
-BIN = Citysim
+OBJ = citysim.o city_helper.o city_graph.o
 
-all: $(BIN)
+citysim: $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
-.cpp: 
-	$(CC) $(CFLAGS) -o $@ $<
+citysim.o: 
+city_helper.o: city_helper.cpp
 
 clean:
-	rm -f $(BIN) 
+	rm -f citysim *.o
 	rm -f city_info.txt 
 	rm -f city_distancetable.txt 
 	rm -f city_timetable.txt 

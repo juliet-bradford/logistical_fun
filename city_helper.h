@@ -1,5 +1,5 @@
-#ifndef CITY_CLASS_H
-#define CITY_CLASS_H
+#ifndef CITY_HELPER_H
+#define CITY_HELPER_H
 
 #include <string>
 #include <vector>
@@ -41,5 +41,9 @@ class costtable{
 		vector<float> distance_table;
 		vector<float> time_table;
 };
+
+void write_cityinfo(const vector<city>&);
+void write_distancetable(const vector<city>&, const costtable&);
+void write_timetable(const vector<city>&, const costtable&);
 
 #endif
