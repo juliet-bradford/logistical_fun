@@ -9,7 +9,7 @@ using std::vector;
 using std::istream;
 using std::ostream;
 
-//class holding data read in from "city_list.txt"
+// holds data from a list of cities
 class city {
 	public:
 		city();
@@ -30,8 +30,7 @@ class city {
 		float lat, lon;
 };
 
-//computes and contains a table of distances between all cities and a table of the time 
-//it takes to get from one city to another
+// holds the distance and time to traverse between any two (directly) connected cities
 class costtable{
 	public:
 		costtable(const vector<city>&);
@@ -42,6 +41,7 @@ class costtable{
 		vector<float> time_table;
 };
 
+// writes table information to .txt files, only ran with -graphinfo
 void write_cityinfo(const vector<city>&);
 void write_distancetable(const vector<city>&, const costtable&);
 void write_timetable(const vector<city>&, const costtable&);
