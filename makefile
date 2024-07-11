@@ -1,16 +1,16 @@
-
+PROG = citysim
 CC = g++
 CFLAGS = -g -Wall
-OBJ = citysim.o city_helper.o city_graph.o
 
-citysim: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $(OBJ)
+SRC = $(wildcard src/*.cpp)
+OBJ = $(SRC:.c=.o)
 
-citysim.o: 
-city_helper.o: city_helper.cpp
+
+$(PROG): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ 
 
 clean:
-	rm -f citysim *.o
+	rm -f $(PROG)
 	rm -f city_info.txt 
 	rm -f city_distancetable.txt 
 	rm -f city_timetable.txt 
